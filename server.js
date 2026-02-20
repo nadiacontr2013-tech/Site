@@ -23,14 +23,9 @@ app.use(helmet({
 /* ======================================================
    🌍 CORS FIX (DEV + PRODUCTION)
 ====================================================== */
-
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  'https://nacksa.com',
-  'https://www.nacksa.com'
+  "https://nacksa.com",
+  "https://www.nacksa.com"
 ];
 
 app.use(cors({
@@ -39,18 +34,25 @@ app.use(cors({
     // Allow Postman / server-to-server
     if (!origin) return callback(null, true);
 
+    // Allow production domains
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Allow local development
     if (
-      allowedOrigins.includes(origin) ||
-      (origin && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')))
+      origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:")
     ) {
       return callback(null, true);
-    } else {
-      console.warn(`⚠️ Blocked by CORS: ${origin}`);
-      return callback(new Error('Not allowed by CORS'));
     }
+
+    console.warn(`⚠️ Blocked by CORS: ${origin}`);
+    return callback(new Error("Not allowed by CORS"));
   },
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 
@@ -267,4 +269,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 
 });
+
 
