@@ -191,18 +191,23 @@ Message: ${message || 'No message'}
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', env: process.env.NODE_ENV });
 });
-
-
 app.get('/api/test-email', async (req, res) => {
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: "SMTP Test",
-      text: "Email test successful"
-    });
+
+    await Promise.race([
+      transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER,
+        subject: "SMTP Test",
+        text: "Email test successful"
+      }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("SMTP Timeout")), 8000)
+      )
+    ]);
 
     res.json({ success: true });
+
   } catch (err) {
     console.error("TEST EMAIL ERROR:", err);
     res.status(500).json({ error: err.message });
@@ -292,6 +297,7 @@ app.listen(PORT, '0.0.0.0', () => {
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+
 
 
 
