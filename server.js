@@ -128,20 +128,38 @@ const upload = multer({
    EMAIL SETUP
 ====================================================== */
 
+/* ======================================================
+   EMAIL SETUP (FIXED FOR RENDER + GMAIL)
+====================================================== */
+
 const transporter = nodemailer.createTransport({
+
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, // IMPORTANT for Render
-   secure: false,
+  secure: false, // TLS via STARTTLS
+
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+
+  tls: {
+    rejectUnauthorized: false
+  },
+
+  connectionTimeout: 10000, // 10 sec
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
+
+  family: 4 // Force IPv4 (Fix Render IPv6 issues)
 });
 
-transporter.verify(err => {
-  if (err) console.error('❌ Email Error:', err);
-  else console.log('✅ Email Ready');
+transporter.verify((err, success) => {
+  if (err) {
+    console.error("❌ Email SMTP Error:", err);
+  } else {
+    console.log("✅ Email SMTP Connected");
+  }
 });
 
 /* ======================================================
@@ -297,6 +315,7 @@ app.listen(PORT, '0.0.0.0', () => {
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+
 
 
 
