@@ -237,8 +237,13 @@ app.use('/api/*', (req, res) => {
 /* ======================================================
    SERVE FRONTEND
 ====================================================== */
+app.get('/', (req, res) => {
+  res.send('Nacksa Backend API Running');
+});
 
-
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK' });
+});
 
 /* ======================================================
    ERROR HANDLER
@@ -262,3 +267,4 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 
 });
+
