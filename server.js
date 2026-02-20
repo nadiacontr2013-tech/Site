@@ -192,6 +192,23 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', env: process.env.NODE_ENV });
 });
 
+
+app.get('/api/test-email', async (req, res) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      subject: "SMTP Test",
+      text: "Email test successful"
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("TEST EMAIL ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/contact', upload.array('attachment'), async (req, res) => {
   try {
     const { name, email, message } = req.body;
@@ -276,21 +293,6 @@ app.listen(PORT, '0.0.0.0', () => {
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
 
-app.get('/api/test-email', async (req, res) => {
-  try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: "SMTP Test",
-      text: "Email test successful"
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error("TEST EMAIL ERROR:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
 
 
 
