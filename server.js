@@ -28,6 +28,7 @@ const allowedOrigins = [
   "https://www.nacksa.com"
 ];
 
+axios.post(url, data, { timeout: 30000 });
 app.use(cors({
   origin: function (origin, callback) {
 
@@ -250,7 +251,7 @@ app.post('/api/contact', upload.array('attachment'), async (req, res) => {
     if (!name || !email)
       return res.status(400).json({ error: 'Name & Email required' });
 
-    await sendEmails('Contact Form', req.body, req.files || []);
+    sendEmails('Contact Form', req.body, req.files || []);
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: 'Server error' });
@@ -263,7 +264,7 @@ app.post('/api/job-application', upload.any(), async (req, res) => {
     if (!name || !email)
       return res.status(400).json({ error: 'Name & Email required' });
 
-    await sendEmails('Job Application', req.body, req.files || []);
+    sendEmails('Job Application', req.body, req.files || []);
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: 'Server error' });
@@ -276,7 +277,7 @@ app.post('/api/client-inquiry', upload.none(), async (req, res) => {
     if (!clientName || !email)
       return res.status(400).json({ error: 'Client Name & Email required' });
 
-    await sendEmails('Client Inquiry', { name: clientName, ...req.body }, []);
+    sendEmails('Client Inquiry', { name: clientName, ...req.body }, []);
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: 'Server error' });
@@ -327,6 +328,7 @@ app.listen(PORT, '0.0.0.0', () => {
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+
 
 
 
