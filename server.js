@@ -28,7 +28,7 @@ const allowedOrigins = [
   "https://www.nacksa.com"
 ];
 
-axios.post(url, data, { timeout: 30000 });
+
 app.use(cors({
   origin: function (origin, callback) {
 
@@ -328,6 +328,7 @@ app.listen(PORT, '0.0.0.0', () => {
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+
 
 
 
