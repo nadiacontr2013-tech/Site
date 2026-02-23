@@ -170,14 +170,25 @@ async function sendEmails(type, data, files = []) {
   const { name, email, message } = data;
   const adminRecipients = process.env.BUSINESS_EMAIL || process.env.EMAIL_USER;
 
+  const emailBodyArray = [];
+  for (const [key, value] of Object.entries(data)) {
+    if (value && key !== 'attachment' && key !== 'name' && key !== 'email') {
+      if (typeof value === 'object') {
+        emailBodyArray.push(`${key}:\n${JSON.stringify(value, null, 2)}`);
+      } else {
+        emailBodyArray.push(`${key}: ${value}`);
+      }
+    }
+  }
+
   const adminMail = {
     from: `"NAC Website" <${process.env.EMAIL_USER}>`,
     to: adminRecipients,
     subject: `[NAC] New ${type}: ${name}`,
-    text: `
-Name: ${name}
+    text: `Name: ${name}
 Email: ${email}
-Message: ${message || 'No message'}
+
+${emailBodyArray.length > 0 ? emailBodyArray.join('\n') : 'No additional data provided.'}
     `,
     attachments: files.map(f => ({
       filename: f.originalname,
@@ -197,6 +208,7 @@ Message: ${message || 'No message'}
     await transporter.sendMail(userMail);
   } catch (err) {
     console.error('Email send error:', err);
+    throw err;
   } finally {
     files.forEach(f => fs.unlink(f.path, () => { }));
   }
@@ -238,7 +250,7 @@ app.post('/api/contact', upload.array('attachment'), async (req, res) => {
     if (!name || !email)
       return res.status(400).json({ error: 'Name & Email required' });
 
-    sendEmails('Contact Form', req.body, req.files || []);
+    await sendEmails('Contact Form', req.body, req.files || []);
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: 'Server error' });
@@ -251,7 +263,7 @@ app.post('/api/job-application', upload.any(), async (req, res) => {
     if (!name || !email)
       return res.status(400).json({ error: 'Name & Email required' });
 
-    sendEmails('Job Application', req.body, req.files || []);
+    await sendEmails('Job Application', req.body, req.files || []);
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: 'Server error' });
@@ -264,7 +276,7 @@ app.post('/api/client-inquiry', upload.none(), async (req, res) => {
     if (!clientName || !email)
       return res.status(400).json({ error: 'Client Name & Email required' });
 
-    sendEmails('Client Inquiry', { name: clientName, email }, []);
+    await sendEmails('Client Inquiry', { name: clientName, ...req.body }, []);
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: 'Server error' });
@@ -315,7 +327,6 @@ app.listen(PORT, '0.0.0.0', () => {
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
-
 
 
 
