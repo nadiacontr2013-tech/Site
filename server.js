@@ -143,11 +143,18 @@
     pass: process.env.EMAIL_PASS
   },
 
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
+  tls: {
+    rejectUnauthorized: false
+  },
 
-  family: 4 // Force IPv4
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
+
+  // FORCE IPv4 DNS resolution
+  lookup: (hostname, options, callback) => {
+    require("dns").lookup(hostname, { family: 4 }, callback);
+  }
 });
    
    transporter.verify((err, success) => {
@@ -330,3 +337,4 @@ await sendEmails('Client Inquiry', { name: clientName, ...req.body }, []);
    
    
    
+
